@@ -7,25 +7,24 @@ organization_name = 'your_organization'
 # Directory where repositories will be cloned
 clone_directory = 'path/to/cloned/repositories'
 
-def get_organization_repositories(org_name):
-    url_template = 'git@github.com:{org_name}/{repo_name}.git'
-    
+def get_organization_repositories(org_name, token):
     # Ensure the clone directory exists
     os.makedirs(clone_directory, exist_ok=True)
 
-    # Get the list of repositories in the organization
-    response = os.popen(f'curl -s https://api.github.com/orgs/{org_name}/repos').read()
-    repositories = [repo['name'] for repo in yaml.safe_load(response)]
+    # GitHub API URL for organization repositories
+    url = f'https://api.github.com/orgs/{org_name}/repos'
 
-    # Clone each repository
-    for repo_name in repositories:
-        repo_url = url_template.format(org_name=org_name, repo_name=repo_name)
-        os.system(f'git clone {repo_url} {os.path.join(clone_directory, repo_name)}')
+    # Use curl with Bearer token for authentication and print the output
+    os.system(f'curl -s -H "Authorization: Bearer {token}" {url} > repositories.json')
 
-# The rest of the script remains unchanged...
-# Get all repositories in the organization
-os.system(f'curl -s "https://api.github.com/orgs/{organization_name}/repos" | jq -r ".[].name"' +
-          f' | xargs -I {{}} git clone git@github.com:{organization_name}/{{}}.git {clone_directory}/{{}}')
+    # Parse the repositories.json file and clone each repository
+    with open('repositories.json', 'r') as file:
+        repositories = yaml.safe_load(file)
+
+        # Clone each repository using git command
+        for repo in repositories:
+            repo_name = repo['name']
+            os.system(f'git clone git@github.com:{org_name}/{repo_name}.git {os.path.join(clone_directory, repo_name)}')
 
 # Get all repositories in the organization
 get_organization_repositories(organization_name)
