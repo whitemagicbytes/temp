@@ -23,6 +23,9 @@ def get_organization_repositories(org_name):
         os.system(f'git clone {repo_url} {os.path.join(clone_directory, repo_name)}')
 
 # The rest of the script remains unchanged...
+# Get all repositories in the organization
+os.system(f'curl -s "https://api.github.com/orgs/{organization_name}/repos" | jq -r ".[].name"' +
+          f' | xargs -I {{}} git clone git@github.com:{organization_name}/{{}}.git {clone_directory}/{{}}')
 
 # Get all repositories in the organization
 get_organization_repositories(organization_name)
