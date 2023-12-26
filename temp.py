@@ -72,3 +72,36 @@ for repo_name in success_list:
 print("\nRepositories update failed:")
 for repo_name in failure_list:
     print(f"- {repo_name}")
+
+
+def update_yaml_file(file_path, yaml_to_compare_path):
+    try:
+        # Load YAML data from both files
+        with open(file_path, 'r') as file:
+            yaml_data = yaml.safe_load(file)
+
+        with open(yaml_to_compare_path, 'r') as file:
+            yaml_to_compare_data = yaml.safe_load(file)
+
+        # Check if the 'secrets' key exists in YAML 1
+        if 'secrets' in yaml_data:
+            # Check if 'valut_paths' key exists in YAML 1
+            if 'valut_paths' in yaml_data['secrets'][0]:
+                # Update 'valut_paths' in YAML 1 with the value from YAML 2
+                yaml_data['secrets'][0]['valut_paths'] = yaml_to_compare_data.get('valut_paths', [])
+
+                # Write the modified YAML data back to the file
+                with open(file_path, 'w') as file:
+                    yaml.dump(yaml_data, file, default_flow_style=False)
+
+                print(f'Updated "valut_paths" in "{file_path}" with values from "{yaml_to_compare_path}"')
+                return True
+            else:
+                print(f'Key "valut_paths" not found in "{file_path}"')
+        else:
+            print(f'Key "secrets" not found in "{file_path}"')
+
+        return False
+    except Exception as e:
+        print(f'Error updating YAML file: {str(e)}')
+        return False
