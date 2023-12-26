@@ -8,55 +8,21 @@ organization_name = 'your_organization'
 clone_directory = 'path/to/cloned/repositories'
 
 def get_organization_repositories(org_name):
-    url = f'git@github.com:{org_name}.git'
-    os.system(f'git clone {url} {clone_directory}')
+    url_template = 'git@github.com:{org_name}/{repo_name}.git'
+    
+    # Ensure the clone directory exists
+    os.makedirs(clone_directory, exist_ok=True)
 
-def create_pull_request(repo_name, base_branch, head_branch, title, body):
-    os.system(f'cd {clone_directory}/{repo_name} && git checkout -b {head_branch} && git push origin {head_branch}')
-    os.system(f'cd {clone_directory}/{repo_name} && git checkout {base_branch}')
-    os.system(f'cd {clone_directory}/{repo_name} && git pull origin {base_branch}')
-    os.system(f'cd {clone_directory}/{repo_name} && git merge --no-ff {head_branch}')
-    os.system(f'cd {clone_directory}/{repo_name} && git push origin {base_branch}')
-    os.system(f'cd {clone_directory}/{repo_name} && git checkout {base_branch}')
-    os.system(f'cd {clone_directory}/{repo_name} && git branch -D {head_branch}')
+    # Get the list of repositories in the organization
+    response = os.popen(f'curl -s https://api.github.com/orgs/{org_name}/repos').read()
+    repositories = [repo['name'] for repo in yaml.safe_load(response)]
 
-def update_yaml_file(file_path, key_to_update, new_value):
-    try:
-        # Load YAML data from the file
-        with open(file_path, 'r') as file:
-            yaml_data = yaml.safe_load(file)
+    # Clone each repository
+    for repo_name in repositories:
+        repo_url = url_template.format(org_name=org_name, repo_name=repo_name)
+        os.system(f'git clone {repo_url} {os.path.join(clone_directory, repo_name)}')
 
-        # Update the specified key with the new value
-        yaml_data[key_to_update] = new_value
-
-        # Write the modified YAML data back to the file
-        with open(file_path, 'w') as file:
-            yaml.dump(yaml_data, file, default_flow_style=False)
-
-        print(f'Value for key "{key_to_update}" updated successfully in {file_path}')
-        return True
-    except Exception as e:
-        print(f'Error updating YAML file: {str(e)}')
-        return False
-
-def delete_line_in_yaml(file_path, string_to_delete):
-    try:
-        # Read the contents of the YAML file
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-
-        # Remove lines containing the specified string
-        modified_lines = [line for line in lines if string_to_delete not in line]
-
-        # Write the modified lines back to the file
-        with open(file_path, 'w') as file:
-            file.writelines(modified_lines)
-
-        print(f'Lines containing "{string_to_delete}" deleted successfully in {file_path}')
-        return True
-    except Exception as e:
-        print(f'Error deleting lines in YAML file: {str(e)}')
-        return False
+# The rest of the script remains unchanged...
 
 # Get all repositories in the organization
 get_organization_repositories(organization_name)
