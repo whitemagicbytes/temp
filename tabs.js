@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import TabNavItem from "../V2/TabNavItem";
 import TabContent from "../V2/TabContent";
 import CommonForm from './CommonForm';
 
+interface APIRequestData {
+  tabName: string;
+  formData: Record<string, string>;
+}
+
 const Tabs = () => {
   const [activeTab, setActiveTab] = useState("tab1");
 
-  const handleFormSubmit = (formData) => {
-    const apiData = {
+  const handleFormSubmit = (formData: Record<string, string>) => {
+    const apiData: APIRequestData = {
       // Construct API data object based on formData and activeTab
       tabName: activeTab,
       formData,
@@ -30,10 +35,4 @@ const Tabs = () => {
 
       <div className="outlet">
         <TabContent id="tab1" activeTab={activeTab}>
-          <CommonForm activeTab="tab1" onSubmit={handleFormSubmit} />
-        </TabContent>
-        <TabContent id="tab2" activeTab={activeTab}>
-          <CommonForm activeTab="tab2" onSubmit={handleFormSubmit} />
-        </TabContent>
-        <TabContent id="tab3" activeTab={activeTab}>
-          <CommonForm activeTab="tab3" onSubmit
+          <Common
