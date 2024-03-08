@@ -1,10 +1,20 @@
 import React from 'react';
 import { useForm } from 'react-hook-form'; // Assuming you're using it
 
-function CommonForm({ activeTab, onSubmit }) {
+interface FieldDefinition {
+  regex?: RegExp;
+  placeholder?: string;
+}
+
+interface Props {
+  activeTab: string;
+  onSubmit: (formData: Record<string, string>) => void;
+}
+
+function CommonForm({ activeTab, onSubmit }: Props) {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const fieldDefinitions = {
+  const fieldDefinitions: Record<string, FieldDefinition> = {
     a: {
       regex: /^[a-zA-Z]+$/,
       placeholder: 'Enter text only (a-z, A-Z)',
@@ -28,7 +38,7 @@ function CommonForm({ activeTab, onSubmit }) {
     },
   };
 
-  const fieldsByTab = {
+  const fieldsByTab: Record<string, string[]> = {
     tab1: ['a', 'b', 'c', 'd', 'e'],
     tab2: ['a', 'b', 'c', 'd', 'f', 'g'],
     tab3: ['a', 'b', 'c', 'd', 'f', 'i'],
@@ -37,8 +47,8 @@ function CommonForm({ activeTab, onSubmit }) {
   const activeFields = fieldsByTab[activeTab] || [];
 
   // Extract form data based on active fields
-  const getFormData = (data) => {
-    const formData = {};
+  const getFormData = (data: Record<string, string>) => {
+    const formData: Record<string, string> = {};
     activeFields.forEach((field) => {
       formData[field] = data[field];
     });
