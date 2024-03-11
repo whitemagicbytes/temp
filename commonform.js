@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form'; // Assuming you're using it
+import { useForm } from 'react-hook-form';
 
 interface FieldDefinition {
   regex?: RegExp;
@@ -47,29 +47,28 @@ function CommonForm({ activeTab, onSubmit }: Props) {
   const activeFields = fieldsByTab[activeTab] || [];
 
   // Extract form data based on active fields
-  const getFormData = (data: Record<string, string>) => {
+  const getFormData = (data: Record<string, unknown>) => {
     const formData: Record<string, string> = {};
     activeFields.forEach((field) => {
-      formData[field] = data[field];
+      formData[field] = String(data[field]); // Type casting to string
     });
     return formData;
   };
 
   return (
-    <form onSubmit={handleSubmit(() => onSubmit(getFormData(register())))}>
+    <form onSubmit={handleSubmit(() => onSubmit(getFormData(register('myForm'))))}>
       {activeFields.map((field) => (
         <div key={field}>
           <label htmlFor={field}>{field}</label>
           <input
             type="text"
             id={field}
-            {...register(field, {
+            {...register(`myForm.${field}`, { // Register each field with a unique name
               required: true,
-              pattern: fieldDefinitions[field]?.regex, // Apply regex validation if defined
+              pattern: fieldDefinitions[field]?.regex,
             })}
-            placeholder={fieldDefinitions[field]?.placeholder} // Set placeholder if defined
+            placeholder={fieldDefinitions[field]?.placeholder}
           />
-          {errors[field] && <span className="error">{errors[field].message}</span>}
         </div>
       ))}
       <button type="submit">Submit {activeTab}</button>
